@@ -43,3 +43,50 @@ html,body{overflow-x:hidden}
  .app-preview{height:390px}.account-feature h3{font-size:27px}
  .case-heading h1{overflow-wrap:anywhere}.case-end{gap:15px}
 }
+
+/* Mobile reading widths and type scale; desktop composition stays intact. */
+@media(max-width:760px){
+ .section-heading{display:block}
+ .section-heading h2,.app-copy h2,.about-layout h2{font-size:26px;line-height:1.5}
+ .section-description{font-size:15px;line-height:1.85;margin-top:14px;max-width:none}
+ .eyebrow{font-size:11px;letter-spacing:0}
+ .profile-brief p{font-size:14px;line-height:1.85}
+ .profile-brief p br{display:none}
+ .profile-brief>div{min-width:0}
+ .series-summary{gap:12px;font-size:13px;line-height:1.8}
+ .collection-tabs button{font-size:14px;min-height:44px;padding:12px 16px}
+ .account-feature h3{font-size:25px}
+ .account-feature>p:not(.eyebrow),.series-context .production-note>p:not(.eyebrow){font-size:15px}
+ .account-feature .account-ownership{font-size:13px}
+ .commerce-display>.product-directory{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 16px}
+ .commerce-display .product-entry h3{font-size:16px;line-height:1.6}
+ .commerce-display .product-entry p{font-size:13px;line-height:1.7}
+ .photo-carousel-side h3,.commerce-display .photo-carousel-side h3{font-size:22px;line-height:1.5}
+ .photo-carousel-caption,.collection-foot p,.collection-foot a{font-size:14px;line-height:1.85}
+ .photo-carousel-controls button{width:44px;height:44px}
+ .film-editorial{display:block;padding:0}
+ .film-editorial h3{font-size:25px;line-height:1.6}
+ .film-editorial>p:not(.eyebrow){font-size:15px;line-height:1.9;max-width:none;margin-top:16px}
+ .film-editorial .text-link{margin-top:20px}
+ .selling-rail .selling-work{flex-basis:88%;grid-template-columns:minmax(0,1fr);gap:20px;align-content:start}
+ .selling-rail .video-tile{width:min(100%,240px);justify-self:center}
+ .selling-editorial h3{font-size:21px;line-height:1.5}
+ .selling-editorial>p:not(.eyebrow){font-size:15px;line-height:1.85;margin:12px 0}
+ .selling-editorial .eyebrow{font-size:12px}
+ .selling-editorial .selling-case-link,.selling-note{font-size:13px;line-height:1.85}
+ .selling-heading h2{font-size:25px}
+ .animation-heading{align-items:flex-start}
+ .animation-heading>span{font-size:12px}
+ .app-copy>p:not(.eyebrow),.about-copy>p,.contact-copy>p:nth-child(2){font-size:15px;line-height:1.9}
+ .inline-tags{gap:12px;font-size:13px}
+ .about-layout{gap:24px}
+ .contact-section h2{font-size:32px;line-height:1.5}
+ .contact-copy>p:nth-child(2) br{display:none}
+ .text-link{font-size:14px;min-height:44px}
+}
+@media(max-width:360px){
+ .hero h1{font-size:70px}
+ .profile-brief{grid-template-columns:1fr}
+ .profile-brief>div+div{padding:14px 0 0;border-left:0;border-top:1px solid #c8d0cc}
+ .section-heading h2{font-size:24px}
+}
