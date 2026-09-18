@@ -1,0 +1,16 @@
+const sellingLabels={'selling-pillow-1':'家庭使用场景','selling-pillow-2':'人物讲解场景','selling-sleep':'产品卖点展示','selling-spoon':'喂养场景展示','selling-wipes':'产品卖点展示'};
+const sellingVideos = Array.isArray(window.SELLING_VIDEOS) ? window.SELLING_VIDEOS : [];
+function sellingGrid(videos){return `<div class="selling-grid">${videos.map(v=>`<article class="selling-work">${videoTile(v,v.id==='advertising'?'剧情广告':sellingLabels[v.id])}<a class="selling-case-link" href="${v.id==='advertising'?'#/project/advertising':'#/project/commerce/'+v.product}">${v.id==='advertising'?'个人参赛作品 · 非品牌委托':'查看对应商品套图'} ${arrow}</a></article>`).join('')}</div>`;}
+function enhanceSelling(){
+ const entry=document.querySelector('.advertising-entry');if(entry){const section=document.createElement('section');section.className='selling-section';section.id='selling-videos';section.innerHTML=`<div class="selling-heading"><div><p class="eyebrow">ADVERTISING & COMMERCE</p><h2>广告与带货视频</h2></div><p>从剧情创意，到生活场景与产品卖点。<br>1 部剧情广告 · 5 支电商短视频</p></div>${sellingGrid([{id:'advertising',title:'新年一起旺',poster:'advertising.jpg',duration:'01:06'},...sellingVideos])}<p class="selling-note">个人创作与电商制作实践；场景类型不代表实拍证明，展示不作为产品功效、销量或转化率背书。</p>`;entry.replaceWith(section);}
+ const gallery=document.querySelector('.product-case');if(gallery&&!document.querySelector('.product-selling')){const product=location.hash.split('/')[3]||'wipes';const videos=sellingVideos.filter(v=>v.product===product);if(videos.length){const section=document.createElement('section');section.className='product-selling';section.innerHTML=`<div class="selling-heading"><div><p class="eyebrow">PRODUCT IN MOTION</p><h2>同款商品，视频呈现。</h2></div><span>${videos.length} 支成片</span></div>${sellingGrid(videos)}`;gallery.after(section);}}
+ const homeGrid=document.querySelector('.selling-section>.selling-grid');
+ if(homeGrid&&!homeGrid.classList.contains('selling-rail')){
+  homeGrid.classList.add('selling-rail');homeGrid.setAttribute('aria-label','广告与带货作品');
+  const wet=homeGrid.querySelector('[data-video="selling-wipes"]')?.closest('.selling-work');if(wet)homeGrid.children[0].after(wet);
+  const descriptions={advertising:['新年一起旺','以旺仔牛奶为创作对象的职场轻喜剧。从创意、剧本、分镜到成片的完整实践。'],'selling-wipes':['婴儿润肤湿巾','围绕日常清洁场景，结合产品近景与使用画面，把套图中的卖点延展为短视频。'],'selling-pillow-1':['宝宝防摔枕 · 家庭场景','以家庭使用情境呈现产品，围绕佩戴与陪伴场景组织画面。'],'selling-pillow-2':['宝宝防摔枕 · 人物讲解','通过人物讲解与产品展示，尝试更接近日常分享的内容表达。'],'selling-sleep':['新生儿睡袋','结合睡眠场景与产品展示，将外观、包裹方式和使用情境串联成片。'],'selling-spoon':['硅胶软勺','从辅食喂养场景切入，以产品细节与使用画面呈现商品。']};
+  for(const card of homeGrid.children){const video=card.querySelector('[data-video]');const [title,desc]=descriptions[video.dataset.video];const text=document.createElement('div');text.className='selling-editorial';text.innerHTML=`<p class="eyebrow">${video.dataset.video==='advertising'?'剧情广告 / 个人参赛作品':'电商短视频 / 15 秒'}</p><h3>${title}</h3><p>${desc}</p>`;text.append(card.querySelector('.selling-case-link'));card.append(text);}
+ }
+ window.lucide?.createIcons();
+}
+new MutationObserver(rs=>{if(rs.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&(n.matches?.('.section')||n.querySelector?.('.product-case')))))enhanceSelling();}).observe(document.querySelector('main'),{childList:true});enhanceSelling();

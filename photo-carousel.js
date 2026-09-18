@@ -1,0 +1,33 @@
+(()=>{
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)');const controllers=new Set();
+ function create(items,label){
+  const root=document.createElement('section');root.className='photo-carousel';root.setAttribute('aria-label',label);root.setAttribute('aria-roledescription','轮播');
+  root.innerHTML=`<a class="photo-carousel-media"><img decoding="async" alt=""></a><div class="photo-carousel-side"><p class="eyebrow">${label}</p><h3></h3><p class="photo-carousel-caption"></p><a class="text-link photo-carousel-link">查看完整项目 <i data-lucide="arrow-up-right"></i></a><div class="photo-carousel-controls"><button data-photo-prev title="上一张" aria-label="上一张"><i data-lucide="chevron-left"></i></button><span class="photo-carousel-count"></span><button data-photo-next title="下一张" aria-label="下一张"><i data-lucide="chevron-right"></i></button><button data-photo-pause></button></div><p class="photo-carousel-status" aria-live="polite"></p></div>`;
+  let index=0,playing=!reduced.matches&&!navigator.connection?.saveData,visible=false,hover=false,focused=false,timer=null,offset=0,last=0;
+  const img=root.querySelector('img'),pause=root.querySelector('[data-photo-pause]');
+  function sync(){pause.title=playing?'暂停图片轮播':'播放图片轮播';pause.setAttribute('aria-label',pause.title);pause.setAttribute('aria-pressed',String(playing));pause.innerHTML=`<i data-lucide="${playing?'pause':'play'}"></i>`;window.lucide?.createIcons();}
+  const media=root.querySelector('.photo-carousel-media'),strip=document.createElement('div');strip.className='poster-moving-strip';
+  let dimensionsReady=false;
+  [...items,...items].forEach((item,i)=>{const slide=document.createElement('div');slide.className='poster-moving-slide';slide.dataset.href=item.href;const image=document.createElement('img');image.src='assets/'+item.file;image.alt=i<items.length?item.title:'';image.decoding='async';image.addEventListener('load',refreshSizes);if(i>=items.length)slide.setAttribute('aria-hidden','true');slide.append(image);strip.append(slide);});img.replaceWith(strip);
+  function sizes(){return [...strip.children].slice(0,items.length).map(s=>s.getBoundingClientRect().width);}
+  function refreshSizes(){const height=media.clientHeight;if(!height)return;let ready=true;for(const slide of strip.children){const image=slide.firstElementChild;if(!image.naturalWidth){ready=false;continue;}slide.style.width=(height*image.naturalWidth/image.naturalHeight)+'px';}dimensionsReady=ready;if(ready)paint();}
+  function paint(){if(!dimensionsReady)return;const widths=sizes(),length=widths.reduce((a,b)=>a+b,0);if(!length)return;offset=((offset%length)+length)%length;strip.style.width=`${length*2}px`;strip.style.transform=`translate3d(${-offset}px,0,0)`;let cursor=0;index=widths.findIndex(w=>{cursor+=w;return cursor>offset;});if(index<0)index=0;const item=items[index];root.querySelector('h3').textContent=item.name;root.querySelector('.photo-carousel-caption').textContent=item.title;root.querySelectorAll('a').forEach(a=>a.href=item.href);root.querySelector('.photo-carousel-count').textContent=`${index+1} / ${items.length}`;}
+  media.addEventListener('click',e=>{const slide=e.target.closest('.poster-moving-slide');if(slide){e.preventDefault();location.hash=slide.dataset.href;}});
+  function show(next,manual=false){index=(next+items.length)%items.length;offset=sizes().slice(0,index).reduce((a,b)=>a+b,0);paint();if(manual)root.querySelector('.photo-carousel-status').textContent=items[index].title;}
+  function tick(now){if(!root.isConnected)return;const delta=last?Math.min(now-last,50):0;last=now;offset+=delta*.045;paint();timer=requestAnimationFrame(tick);}
+  function schedule(){cancelAnimationFrame(timer);timer=null;last=0;if(playing&&window.portfolioMotionEnabled!==false&&visible&&!hover&&!focused&&!document.hidden)timer=requestAnimationFrame(tick);}
+  const resize=new ResizeObserver(refreshSizes);resize.observe(media);
+  const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;schedule();},{threshold:.3});observer.observe(root);
+  root.querySelector('[data-photo-prev]').onclick=()=>{show(index-1,true);schedule();};root.querySelector('[data-photo-next]').onclick=()=>{show(index+1,true);schedule();};pause.onclick=()=>{playing=!playing;sync();schedule();};
+  media.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'){hover=true;schedule();}});media.addEventListener('pointerleave',()=>{hover=false;schedule();});media.addEventListener('focusin',()=>{focused=true;schedule();});media.addEventListener('focusout',()=>{focused=false;schedule();});
+  const controller={root,schedule,reduce(){if(reduced.matches){playing=false;sync();schedule();}},dispose(){cancelAnimationFrame(timer);resize.disconnect();observer.disconnect();}};controllers.add(controller);
+  root.initialize=()=>{refreshSizes();show(0);sync();};return root;
+ }
+ function enhance(){for(const c of controllers)if(!c.root.isConnected){c.dispose();controllers.delete(c);}
+  const commerce=document.querySelector('.commerce-section');if(commerce&&!commerce.querySelector('.commerce-display')){const directory=commerce.querySelector('.product-directory');const layout=document.createElement('div');layout.className='commerce-display';directory.before(layout);const items=window.PORTFOLIO.products.flatMap(p=>p.images.map(image=>({...image,name:p.name,title:`${p.name} · ${image.title}`,href:'#/project/commerce/'+p.id})));const slider=create(items,'电商视觉 / 完整套图');layout.append(slider,directory);slider.initialize();}
+  const restaurant=document.querySelector('.restaurant-project');if(restaurant){const names=[['restaurant-cover','烧鸟贤人 · 线下 KT 板'],['delivery','鳥贤 · 冬日配送'],['beer','鳥贤 · 一番榨畅饮'],['summer','钟韩 · 盛夏冰爽'],['moon','钟韩 · 中秋节庆'],['national','钟韩 · 国庆节庆'],['community','钟韩 · 社群迎新'],['opening','鳥贤 · 开业酬宾'],['qixi','钟韩 · 七夕套餐']];const slider=create(names.map(([file,title])=>({file:file+'.webp',title,name:'真实门店，真实应用。',href:'#/project/restaurant'})),'餐饮内容 / 历史宣传物料');restaurant.replaceWith(slider);slider.initialize();}
+ }
+ document.addEventListener('visibilitychange',()=>controllers.forEach(c=>c.schedule()));reduced.addEventListener('change',()=>controllers.forEach(c=>c.reduce()));
+ window.addEventListener('portfolio-motion-change',()=>controllers.forEach(c=>c.schedule()));
+ new MutationObserver(rs=>{if(rs.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&(n.matches?.('.commerce-section,.restaurant-section')||n.querySelector?.('.commerce-section')))))enhance();for(const c of controllers)if(!c.root.isConnected){c.dispose();controllers.delete(c);}}).observe(document.querySelector('main'),{childList:true,subtree:true});enhance();
+})();

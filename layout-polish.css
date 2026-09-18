@@ -1,0 +1,45 @@
+/* Keep translated carousel slides from widening the document on small screens. */
+html,body{overflow-x:hidden}
+
+/* Match the restaurant section's outer bounds on wide screens. */
+.section.commerce-section{max-width:1800px;margin-inline:auto}
+
+/* Balance complete sections rather than independently scaling their children. */
+@media(min-width:761px){
+ .hero{height:460px;min-height:460px;max-height:none}
+ .hero-content{bottom:66px}.hero h1{font-size:112px}.hero-bottom{margin-top:14px}.hero-bottom p{font-size:21px}
+ .hero-index{width:245px}.hero-credit{bottom:18px}
+ .commerce-display{grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:36px;align-items:center;width:100%;max-width:none}
+ .commerce-display>.product-directory{display:flex;flex-direction:column;gap:12px}
+ .commerce-display .product-entry{display:grid;grid-template-columns:84px minmax(0,1fr);grid-template-rows:1fr 1fr;column-gap:18px;min-height:84px;border-bottom:1px solid #cbd5d8;padding-bottom:10px}
+ .commerce-display .product-entry:last-child{border-bottom:0;padding-bottom:0}
+ .commerce-display .product-entry-image{grid-row:1/3;width:84px;height:84px}
+ .commerce-display .product-entry h3{font-size:16px;align-self:end;margin:0;line-height:1.5}
+ .commerce-display .product-entry p{align-self:start;margin-top:6px;font-size:12px;justify-content:flex-start;gap:14px}
+ .commerce-display .photo-carousel-side{display:grid;grid-template-columns:1fr auto;gap:5px 15px;padding:14px 0 0;align-items:center}
+ .commerce-display .photo-carousel-side>.eyebrow{grid-column:1;margin:0;font-size:10px}
+ .commerce-display .photo-carousel-side>h3{grid-column:1;font-size:20px}
+ .commerce-display .photo-carousel-controls{grid-column:2;grid-row:1/3;margin:0;gap:8px}
+ .commerce-display .photo-carousel-controls button{width:32px;height:32px}
+ .commerce-display .photo-carousel-count{min-width:45px}
+ .series-videos.representative-layout{grid-template-columns:minmax(240px,320px) minmax(0,1fr);gap:40px}
+ .animation-grid.motion-carousel>.video-tile{flex-basis:calc((100% - 66px)/3.6)}
+ .animation-grid.edge-rail{padding-bottom:42px}.selling-rail{padding-bottom:42px}
+ .restaurant-section .photo-carousel-media{height:460px}
+ .app-preview{height:450px}.app-section{gap:42px}
+ main>.section{padding-top:60px;padding-bottom:60px}
+ .section-heading{margin-bottom:28px}.collection-foot{margin-top:24px}
+}
+@media(min-width:761px) and (max-width:1000px){
+ .commerce-display{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+ .commerce-display .product-entry{grid-template-columns:66px minmax(0,1fr);min-height:66px;column-gap:12px;padding-bottom:6px}
+ .commerce-display .product-entry-image{width:66px;height:66px}.commerce-display .product-entry h3{font-size:14px}
+ .commerce-display .photo-carousel-side{display:block}.commerce-display .photo-carousel-controls{margin-top:12px}
+}
+@media(max-width:760px){
+ main>.section{padding-top:42px;padding-bottom:42px}.section-heading{margin-bottom:24px}
+ .selling-heading h2{font-size:24px}.photo-carousel-side h3{font-size:23px}
+ .restaurant-section .photo-carousel-media{height:380px}
+ .app-preview{height:390px}.account-feature h3{font-size:27px}
+ .case-heading h1{overflow-wrap:anywhere}.case-end{gap:15px}
+}

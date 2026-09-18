@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2f8f54" />
+    <meta name="color-scheme" content="light" />
+    <title>开饭助手</title>
+    <link rel="stylesheet" href="./styles.css?v=1.3.3" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="phone-frame" aria-label="开饭助手手机端原型">
+        <header class="topbar">
+          <div>
+            <p class="location">广州 · 今天晚餐</p>
+            <h1>开饭助手</h1>
+          </div>
+          <button id="editProfile" class="icon-button" aria-label="编辑饮食档案">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 13a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+              <path d="M4 21a8 8 0 0 1 16 0" />
+            </svg>
+          </button>
+        </header>
+
+        <section id="expiryAlert" class="expiry-alert" hidden></section>
+
+        <section id="inventoryCompact" class="inventory-compact">
+          <div>
+            <p class="eyebrow">家里有</p>
+            <strong id="inventoryCompactText">食材 0 项 · 调料 0 项</strong>
+          </div>
+          <div class="inventory-actions">
+            <button id="fillTestInventory" class="ghost-button dev-only" type="button" hidden>测试库存</button>
+            <button id="goInventory" class="ghost-button" type="button">修改</button>
+          </div>
+        </section>
+
+        <section id="inventoryPanel" class="inventory-panel">
+          <div class="inventory-guide">
+            <div>
+              <p class="eyebrow">库存管理</p>
+              <h2>维护食材和调料后，推荐会更准</h2>
+              <p>这里专门管理食材和调料库存。补全后回到推荐页，系统会按现有库存重新筛选能做的菜。</p>
+            </div>
+            <button id="inventoryGuideAction" class="primary-button">根据库存推荐食谱</button>
+          </div>
+
+          <div id="inventoryInsights" class="inventory-insights" aria-live="polite"></div>
+
+          <div class="inventory-tabs" role="tablist" aria-label="库存类型">
+            <button class="inventory-tab active" data-inventory-tab="ingredients">现有食材</button>
+            <button class="inventory-tab" data-inventory-tab="seasonings">调料库存</button>
+          </div>
+
+          <button id="editInventory" class="inventory-edit-button">编辑食材</button>
+
+          <div class="inventory-columns">
+            <div id="ingredientSection">
+              <p class="mini-title">食材</p>
+              <div id="ingredientChips" class="chip-list" aria-live="polite"></div>
+            </div>
+            <div id="seasoningSection">
+              <p class="mini-title">调料</p>
+              <div id="seasoningChips" class="chip-list seasoning-list" aria-live="polite"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-grid">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">今晚先看</p>
+              <h2>推荐 3 道</h2>
+            </div>
+            <div class="section-actions">
+              <button id="openFavoritesShortcut" class="filter-trigger compact" type="button">收藏</button>
+              <button id="openFilterPanel" class="filter-trigger compact" type="button">
+                <span>筛选</span>
+                <strong id="filterCount" hidden>0</strong>
+              </button>
+            </div>
+          </div>
+
+          <details class="advanced-recipe-tools">
+            <summary>搜索、排序和更多筛选</summary>
+            <div class="recipe-search">
+              <label for="recipeSearch">搜索菜谱</label>
+              <div class="recipe-search-box">
+                <input id="recipeSearch" type="search" placeholder="搜索菜名、食材、口味或调料" autocomplete="off" />
+                <button id="clearRecipeSearch" type="button" aria-label="清空搜索">×</button>
+              </div>
+            </div>
+            <div class="recipe-tools">
+              <select id="sortSelect" aria-label="排序方式">
+                <option value="recommend">最适合现在做</option>
+                <option value="time">最快上桌</option>
+                <option value="buyLess">少补买</option>
+                <option value="easyFirst">新手更稳</option>
+              </select>
+            </div>
+
+            <div id="filterStatus" class="filter-status">
+              <p id="filterSummary">全部菜谱</p>
+              <button id="clearActiveFilters" class="text-button" type="button" hidden>清空</button>
+            </div>
+          </details>
+
+          <div id="recipeList" class="recipe-list"></div>
+        </section>
+
+        <section id="recipeDetail" class="detail-panel" aria-live="polite"></section>
+
+        <section id="purchasePanel" class="purchase-panel" hidden>
+          <div class="purchase-guide">
+            <div>
+              <p class="eyebrow">采购助手</p>
+              <h2>按想做的菜，自动整理缺材</h2>
+              <p>根据当前库存和推荐菜谱生成采购清单，可跳转线上买菜平台或导航附近超市。</p>
+            </div>
+            <button id="purchaseBackRecommend" class="ghost-button">回推荐选菜</button>
+          </div>
+
+          <div id="purchaseSummary" class="purchase-summary" aria-live="polite"></div>
+          <div id="purchaseList" class="purchase-list" aria-live="polite"></div>
+
+          <div class="purchase-platforms">
+            <p class="mini-title">采购入口</p>
+            <div id="purchaseShops" class="purchase-shop-grid"></div>
+          </div>
+        </section>
+
+        <section id="mealPlanPanel" class="meal-plan-panel" hidden>
+          <div class="meal-plan-guide">
+            <div>
+              <p class="eyebrow">制作清单</p>
+              <h2>先集中备菜，减少重复动作</h2>
+              <p>把想做的菜加入清单后，这里会汇总需要预处理的食材，并按菜谱拆成份量建议。</p>
+            </div>
+            <button id="mealPlanBackRecommend" class="ghost-button">继续选菜</button>
+          </div>
+
+          <div id="mealPlanSummary" class="meal-plan-summary" aria-live="polite"></div>
+          <div id="mealPrepList" class="meal-prep-list" aria-live="polite"></div>
+        </section>
+
+        <section id="myPanel" class="my-panel" hidden>
+          <div class="my-hero">
+            <div>
+              <p class="eyebrow">我的</p>
+              <h2 id="myUserName">你</h2>
+              <p id="profileSummary">日常家常 · 偏好清淡</p>
+            </div>
+            <button id="quickOnboarding" class="ghost-button">重新登记</button>
+          </div>
+
+          <div class="my-section-grid">
+            <section class="my-card">
+              <div class="my-card-head">
+                <p class="mini-title">饮食目标</p>
+              </div>
+              <div id="myGoalTags" class="my-tag-list"></div>
+            </section>
+
+            <section class="my-card">
+              <div class="my-card-head">
+                <p class="mini-title">口味偏好</p>
+              </div>
+              <div id="myFlavorTags" class="my-tag-list"></div>
+            </section>
+
+            <section class="my-card">
+              <div class="my-card-head">
+                <p class="mini-title">忌口管理</p>
+                <button id="myEditTaboos" class="text-button" type="button">编辑</button>
+              </div>
+              <div id="myTabooTags" class="my-tag-list"></div>
+            </section>
+
+            <section class="my-card">
+              <div class="my-card-head">
+                <p class="mini-title">厨房数据</p>
+                <button id="myGoInventory" class="text-button" type="button">管理</button>
+              </div>
+              <div id="myKitchenStats" class="stat-grid"></div>
+            </section>
+
+            <section class="my-card">
+              <div class="my-card-head">
+                <p class="mini-title">调料提醒</p>
+                <button id="toggleSeasoningHistory" class="text-button" type="button">历史</button>
+              </div>
+              <div id="mySeasoningAlerts" class="my-alert-list"></div>
+            </section>
+
+            <section class="my-card premium-card">
+              <div class="my-card-head">
+                <p class="mini-title">会员功能</p>
+                <span class="premium-badge">Pro</span>
+              </div>
+              <div class="premium-feature-list">
+                <article>
+                  <strong>周菜单计划</strong>
+                  <span>一次规划 3-7 天吃什么，并自动整理采购清单。</span>
+                </article>
+                <article>
+                  <strong>营养目标统计</strong>
+                  <span>跟踪热量、蛋白质、碳水、脂肪，适合减脂和健身。</span>
+                </article>
+              </div>
+            </section>
+
+            <section class="my-card">
+              <div class="my-card-head">
+                <p class="mini-title">常用入口</p>
+              </div>
+              <div class="shortcut-grid">
+                <button type="button" data-my-shortcut="favorites">我的收藏</button>
+                <button type="button" data-my-shortcut="mealPlan">制作清单</button>
+                <button type="button" data-my-shortcut="purchase">采购助手</button>
+                <button type="button" data-my-shortcut="recommend">继续选菜</button>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <button id="mealPlanFab" class="meal-plan-fab" type="button" hidden aria-label="打开制作清单">
+          <span id="mealPlanFabSummary">清单</span>
+          <strong id="mealPlanFabCount">0</strong>
+        </button>
+
+        <nav class="bottom-nav" aria-label="底部导航">
+          <button class="nav-item active" data-view="recommend">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.5Z" /></svg>
+            推荐
+          </button>
+          <button class="nav-item" data-view="inventory">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10l2 5v11H5V9l2-5Z" /><path d="M5 9h14" /></svg>
+            库存
+          </button>
+          <button class="nav-item" data-view="my">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+            我的
+          </button>
+        </nav>
+      </section>
+    </main>
+
+    <div id="onboardingModal" class="modal-backdrop" hidden>
+      <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">新手向导</p>
+            <h2 id="onboardingTitle">开饭助手怎么帮你</h2>
+          </div>
+          <button id="closeOnboarding" class="round-close" aria-label="关闭登记">×</button>
+        </div>
+
+        <section class="guide-intro" aria-label="开饭助手功能向导">
+          <p>它不是菜谱大全，而是帮你用家里现有食材，快速决定今晚吃什么。</p>
+          <div class="guide-step-list">
+            <article>
+              <strong>1. 先选食材</strong>
+              <span>不用完整登记，选几样家里有的就够。</span>
+            </article>
+            <article>
+              <strong>2. 看 3 道推荐</strong>
+              <span>优先推荐少买、快手、新手稳的菜。</span>
+            </article>
+            <article>
+              <strong>3. 跟着做</strong>
+              <span>进入菜谱详情后，可以加入清单或直接开始做。</span>
+            </article>
+          </div>
+        </section>
+
+        <div class="form-section">
+          <span class="form-label">点一下，选几样常见食材</span>
+          <div class="picker-summary">
+            <div>
+              <strong id="onboardingIngredientCount">已选 0 项</strong>
+              <p id="onboardingIngredientPreview">不用填完整，鸡蛋、青菜、米饭这类就够。</p>
+            </div>
+            <button class="ghost-button" data-open-picker="ingredients">选择食材</button>
+          </div>
+        </div>
+
+        <details class="optional-settings">
+          <summary>有忌口再点这里</summary>
+          <div class="form-section">
+            <span class="form-label">不能吃或不想吃</span>
+            <div class="picker-summary">
+              <div>
+                <strong id="onboardingTabooCount">已设置 0 项</strong>
+                <p id="onboardingTabooPreview">没有也可以先跳过。</p>
+              </div>
+              <button class="ghost-button" data-open-taboo-picker="absolute">管理忌口</button>
+            </div>
+          </div>
+        </details>
+
+        <details class="optional-settings">
+          <summary>更多偏好，之后再补也行</summary>
+          <div class="form-section">
+            <label for="userName">昵称</label>
+            <input id="userName" type="text" placeholder="例如：小陈" />
+          </div>
+
+          <div class="form-section">
+            <span class="form-label">今天想做什么？</span>
+            <div class="choice-grid" data-choice-group="goal">
+              <button data-value="日常家常">家常下饭</button>
+              <button data-value="减脂控卡">轻一点</button>
+              <button data-value="高蛋白">高蛋白</button>
+              <button data-value="清淡养胃">清淡养胃</button>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <span class="form-label">口味偏好</span>
+            <div class="choice-grid compact" data-choice-group="flavors" data-multiple="true">
+              <button data-value="清淡">清淡</button>
+              <button data-value="酸甜">酸甜</button>
+              <button data-value="鲜咸">鲜咸</button>
+              <button data-value="微辣">微辣</button>
+              <button data-value="中辣">中辣</button>
+              <button data-value="香辣">香辣</button>
+              <button data-value="浓郁">浓郁</button>
+              <button data-value="清爽">清爽</button>
+              <button data-value="咸香">咸香</button>
+              <button data-value="少油少盐">少油少盐</button>
+            </div>
+          </div>
+        </details>
+
+        <details class="optional-settings">
+          <summary>调料和有效期，之后再补也行</summary>
+          <div class="form-section">
+            <span class="form-label">已有调料</span>
+            <div class="picker-summary">
+              <div>
+                <strong id="onboardingSeasoningCount">已选 0 项</strong>
+                <p id="onboardingSeasoningPreview">盐、油、生抽这些默认可先用。</p>
+              </div>
+              <button class="ghost-button" data-open-picker="seasonings">选择调料</button>
+            </div>
+            <label class="check-row">
+              <input id="enableExpiry" type="checkbox" />
+              记录调料有效期
+            </label>
+            <div id="onboardingExpiryList" class="expiry-editor" hidden></div>
+          </div>
+        </details>
+
+        <div class="modal-actions">
+          <button id="useDemoProfile" class="ghost-button">跳过，直接推荐</button>
+          <button id="saveProfile" class="primary-button wide">给我推荐 3 道</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="itemPickerModal" class="modal-backdrop" hidden>
+      <section class="modal-card picker-card" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">多选库存</p>
+            <h2 id="pickerTitle">选择常见食材</h2>
+          </div>
+          <button id="closePicker" class="round-close" aria-label="关闭选择器">×</button>
+        </div>
+
+        <div class="picker-tools">
+          <input id="pickerSearch" type="search" placeholder="搜索名称，快速筛选" />
+          <div class="search-row">
+            <input id="customItemInput" type="text" placeholder="没有找到？手动添加" />
+            <button id="addCustomItem" class="primary-button">加入</button>
+          </div>
+        </div>
+
+        <div id="pickerSelected" class="selected-strip"></div>
+        <div id="pickerOptions" class="option-grid"></div>
+        <div id="pickerExpiryTools" class="picker-expiry-tools" hidden>
+          <button id="togglePickerExpiry" class="ghost-button" type="button">添加有效期</button>
+          <div id="pickerExpiryEditor" class="expiry-editor" hidden></div>
+        </div>
+
+        <div class="modal-actions single">
+          <button id="savePicker" class="primary-button wide">保存选择</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="tabooPickerModal" class="modal-backdrop" hidden>
+      <section class="modal-card picker-card" role="dialog" aria-modal="true" aria-labelledby="tabooPickerTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">忌口管理</p>
+            <h2 id="tabooPickerTitle">选择忌口食材</h2>
+          </div>
+          <button id="closeTabooPicker" class="round-close" aria-label="关闭忌口管理">×</button>
+        </div>
+
+        <div class="inventory-tabs compact-tabs">
+          <button class="active" data-taboo-mode="absolute">绝对禁忌</button>
+          <button data-taboo-mode="avoid">不喜欢/可省略</button>
+        </div>
+        <p id="tabooPickerHint" class="taboo-mode-hint">绝对不吃的食材会强提醒，不喜欢的配菜会尽量避开。</p>
+
+        <div class="picker-tools">
+          <input id="tabooSearch" type="search" placeholder="搜索忌口食材，快速筛选" />
+          <div class="search-row">
+            <input id="customTabooInput" type="text" placeholder="没有找到？手动添加" />
+            <button id="addCustomTaboo" class="primary-button">加入</button>
+          </div>
+        </div>
+
+        <div id="tabooSelected" class="selected-strip"></div>
+        <div id="tabooOptions" class="option-grid"></div>
+
+        <div class="modal-actions single">
+          <button id="saveTabooPicker" class="primary-button wide">保存</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="recipeFilterModal" class="modal-backdrop" hidden>
+      <section class="modal-card filter-card" role="dialog" aria-modal="true" aria-labelledby="recipeFilterTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">筛选</p>
+            <h2 id="recipeFilterTitle">筛选菜谱</h2>
+          </div>
+          <button id="closeRecipeFilter" class="round-close" aria-label="关闭筛选">×</button>
+        </div>
+
+        <div id="recipeFilterOptions" class="filter-options"></div>
+
+        <div class="modal-actions">
+          <button id="resetRecipeFilters" class="ghost-button" type="button">重置</button>
+          <button id="applyRecipeFilters" class="primary-button wide" type="button">应用筛选</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="seasoningHistoryModal" class="modal-backdrop" hidden>
+      <section class="modal-card history-card" role="dialog" aria-modal="true" aria-labelledby="seasoningHistoryTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">历史</p>
+            <h2 id="seasoningHistoryTitle">已忽略的提醒</h2>
+          </div>
+          <button id="closeSeasoningHistory" class="round-close" aria-label="关闭提醒历史">×</button>
+        </div>
+        <div id="mySeasoningHistory" class="my-alert-history"></div>
+      </section>
+    </div>
+
+    <div id="tabooWarningModal" class="modal-backdrop" hidden>
+      <section class="modal-card taboo-warning-card" role="dialog" aria-modal="true" aria-labelledby="tabooWarningTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">忌口提醒</p>
+            <h2 id="tabooWarningTitle">这道菜包含你的绝对忌口</h2>
+          </div>
+          <button id="closeTabooWarning" class="round-close" aria-label="关闭忌口提醒">×</button>
+        </div>
+        <div id="tabooWarningBody"></div>
+        <div class="modal-actions">
+          <button id="cancelTabooRecipe" class="ghost-button" type="button">先不看</button>
+          <button id="continueTabooRecipe" class="primary-button wide" type="button">仍然查看</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="recipeInfoModal" class="modal-backdrop" hidden>
+      <section class="modal-card recipe-info-card" role="dialog" aria-modal="true" aria-labelledby="recipeInfoTitle">
+        <div class="modal-head recipe-modal-head">
+          <h2 id="recipeInfoTitle" class="sr-only">菜名</h2>
+          <button id="closeRecipeInfo" class="round-close" aria-label="关闭菜谱详情">×</button>
+        </div>
+
+        <div id="recipeInfoBody" class="recipe-info-body"></div>
+
+        <div class="modal-actions recipe-actions-row">
+          <button id="addToMealPlan" class="ghost-button">加入制作清单</button>
+          <button id="startCooking" class="primary-button wide">开始做</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="cookingModeModal" class="modal-backdrop" hidden>
+      <section class="modal-card cooking-card" role="dialog" aria-modal="true" aria-labelledby="cookingModeTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">做饭模式</p>
+            <h2 id="cookingModeTitle">跟着步骤做</h2>
+          </div>
+          <button id="closeCookingMode" class="round-close" aria-label="关闭做饭模式">×</button>
+        </div>
+
+        <div id="cookingModeBody" class="cooking-mode-body"></div>
+
+        <div class="modal-actions cooking-actions">
+          <button id="prevCookingStep" class="ghost-button" type="button">上一步</button>
+          <button id="nextCookingStep" class="primary-button wide" type="button">下一步</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="./data/recipe-core.js"></script>
+    <script src="./data/recipe-sop.js"></script>
+    <script src="./data/recipe-media.js"></script>
+    <script src="./data/recipe-catalog.js"></script>
+    <script src="./app.js?v=1.3.3"></script>
+  <script src="portfolio-adapter.js"></script></body>
+</html>
