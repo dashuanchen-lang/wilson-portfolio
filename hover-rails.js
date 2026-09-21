@@ -12,10 +12,12 @@
    function stop(){direction=0;cancelAnimationFrame(raf);raf=0;last=0;el.classList.remove('edge-moving');}
    function start(nextDirection){if(reduced.matches||document.hidden||dragging||document.querySelector('#viewer[open]'))return;direction=nextDirection;el.dataset.edgeInteracted='true';if(!raf){el.classList.add('edge-moving');raf=requestAnimationFrame(tick);}}
    function tick(now){if(!direction||document.hidden||!el.isConnected)return stop();const delta=last?Math.min(now-last,40):16;last=now;el.scrollLeft+=direction*delta*.38;update();if((direction<0&&prev.disabled)||(direction>0&&next.disabled))return stop();raf=requestAnimationFrame(tick);}
-   function beginDrag(e){if(e.pointerType!=='mouse'||e.button!==0)return;stop();dragging=true;dragMoved=false;dragStartX=e.clientX;dragStartScroll=el.scrollLeft;el.dataset.edgeInteracted='true';el.classList.add('edge-dragging');el.setPointerCapture?.(e.pointerId);e.preventDefault();}
-   function moveDrag(e){if(!dragging)return;const distance=e.clientX-dragStartX;if(Math.abs(distance)>4)dragMoved=true;el.scrollLeft=dragStartScroll-distance;update();}
+   function beginDrag(e){if(e.pointerType!=='mouse'||e.button!==0)return;stop();suppressClick=false;dragging=true;dragMoved=false;dragStartX=e.clientX;dragStartScroll=el.scrollLeft;el.dataset.edgeInteracted='true';}
+   function moveDrag(e){if(!dragging)return;const distance=e.clientX-dragStartX;if(!dragMoved){if(Math.abs(distance)<=6)return;dragMoved=true;el.classList.add('edge-dragging');el.setPointerCapture?.(e.pointerId);}e.preventDefault();el.scrollLeft=dragStartScroll-distance;update();}
    function endDrag(e){if(!dragging)return;dragging=false;el.classList.remove('edge-dragging');if(dragMoved){suppressClick=true;setTimeout(()=>{suppressClick=false},0);}try{el.releasePointerCapture?.(e.pointerId)}catch{} }
    el.addEventListener('pointerdown',beginDrag);el.addEventListener('pointermove',moveDrag);el.addEventListener('pointerup',endDrag);el.addEventListener('pointercancel',endDrag);
+   el.addEventListener('pointerleave',e=>{if(dragging&&!dragMoved)endDrag(e)});
+   el.addEventListener('dragstart',e=>e.preventDefault());
    el.addEventListener('click',e=>{if(suppressClick){e.preventDefault();e.stopPropagation();suppressClick=false;}},true);
    [prev,next].forEach((b,i)=>{const d=i?1:-1;b.addEventListener('pointerenter',()=>start(d));b.addEventListener('pointerleave',stop);b.addEventListener('focus',()=>start(d));b.addEventListener('blur',stop);b.onclick=()=>{stop();el.scrollBy({left:d*(el.firstElementChild.getBoundingClientRect().width+24),behavior:reduced.matches?'instant':'smooth'});};});
    [[leftZone,-1],[rightZone,1]].forEach(([zone,d])=>{zone.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')start(d)});zone.addEventListener('pointerleave',stop);});
